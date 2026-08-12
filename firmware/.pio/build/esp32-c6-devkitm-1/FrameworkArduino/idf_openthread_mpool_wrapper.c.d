@@ -1,0 +1,31 @@
+.pio/build/esp32-c6-devkitm-1/FrameworkArduino/idf_openthread_mpool_wrapper.c.o: \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32/cores/esp32/idf_openthread_mpool_wrapper.c \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/soc/esp32c6/include/soc/soc_caps.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/qio_qspi/include/sdkconfig.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/newlib/platform_include/assert.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/heap/include/esp_heap_caps.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/heap/include/multi_heap.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/esp_common/include/esp_err.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/newlib/platform_include/stdio.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/esp_common/include/esp_compiler.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/esp_common/include/esp_attr.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/esp_rom/include/esp_rom_sys.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/soc/esp32c6/include/soc/reset_reasons.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_config.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_level.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/esp_common/include/esp_assert.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_color.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_buffer.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_timestamp.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_write.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_format.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_args.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/esp_common/include/esp_macros.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/esp_common/include/esp_assert.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_log_attr.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/log/include/esp_private/log_attr.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/openthread/openthread/include/openthread/instance.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/openthread/openthread/include/openthread/error.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/openthread/openthread/include/openthread/platform/toolchain.h \
+ C:/Users/kojoe/.platformio/packages/framework-arduinoespressif32-libs/esp32c6/include/openthread/openthread/include/openthread/platform/messagepool.h

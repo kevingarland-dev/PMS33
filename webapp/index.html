@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#F0EAE0">
+    <meta name="description"
+        content="PMS33 Patient Monitoring System — Live temperature, humidity, pressure and light readings from Adafruit IO.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PMS33">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>PMS33 — Patient Monitor</title>
+
+    <!-- Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <div id="app">
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         SCREEN 01 — Onboarding / Pairing (Mockup 01)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <section id="screen-setup" class="screen" role="main" aria-label="Setup">
+            <div class="setup-center">
+                <div>
+                    <div class="setup-label">SETUP</div>
+                    <h1 class="setup-title">Connect the station</h1>
+                </div>
+
+                <!-- Search animation -->
+                <div class="search-ring" aria-hidden="true">
+                    <div class="search-ring-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <p class="search-hint">
+                    Searching for nearby stations…
+                    <span>Make sure the HC-05 / ESP32 module is powered and within 10m.</span>
+                </p>
+
+                <!-- Discovered device card -->
+                <div class="device-found-card">
+                    <div class="device-icon">HC</div>
+                    <div class="device-info">
+                        <div class="device-name">Bedside Station 01</div>
+                        <div class="device-sub">HC-05 · 98:D3:31:F4:42A</div>
+                    </div>
+                    <div class="device-badge">Found</div>
+                </div>
+            </div>
+
+            <div style="height:24px"></div>
+            <div class="setup-actions">
+                <button id="btn-pair-connect" class="btn-primary">Pair &amp; connect</button>
+                <button id="btn-manual-entry" class="btn-secondary">Enter pairing code manually</button>
+            </div>
+
+            <!-- Manual entry form (hidden until requested) -->
+            <div id="manual-entry-form" class="hidden"
+                style="width:100%;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+                <div style="border-top:1px solid rgba(0,0,0,0.08);margin:0 -24px;padding:0 24px 14px">
+                    <p style="font-size:12px;color:var(--text-secondary);text-align:center;margin-top:14px">
+                        Enter the local IP address of your ESP32-C6 station.
+                    </p>
+                </div>
+
+                <div class="form-group" style="padding:0">
+                    <label for="setup-patient-name">Patient Name</label>
+                    <input id="setup-patient-name" type="text" placeholder="e.g. Ama K." value="Ama K.">
+                </div>
+
+                <div class="form-group" style="padding:0">
+                    <label for="setup-room">Room / Bed</label>
+                    <input id="setup-room" type="text" placeholder="e.g. Room A — Bed 4A" value="Room A — Bed 4A">
+                </div>
+
+                <div class="form-group" style="padding:0">
+                    <label for="setup-station-ip">Station IP Address</label>
+                    <input id="setup-station-ip" type="text" placeholder="e.g. 192.168.1.50" value="">
+                </div>
+
+                <button id="btn-setup-submit" class="btn-primary">Connect Station</button>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         SCREEN 02 — Dashboard (Mockup 02)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <section id="screen-home" class="screen" role="main" aria-label="Dashboard">
+            <div class="app-header">
+                <div>
+                    <div class="subtitle">BEDSIDE STATION 01 · CONNECTED</div>
+                    <h2 id="dashboard-patient-header">Room A — Ama K.</h2>
+                </div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <button id="btn-quick-mute" class="btn-secondary"
+                        style="padding: 6px 12px; font-size: 14px; border-radius: 8px;">
+                        🔕
+                    </button>
+                    <div class="header-dot online" id="header-online-dot" title="Connected"></div>
+                </div>
+            </div>
+
+            <!-- Stacked full-width sensor cards -->
+            <div class="scroll-area" id="dashboard-cards">
+                <!-- Cards dynamically rendered by dashboard.js -->
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         SCREEN 03 — Active Alarm (Mockup 03)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <section id="screen-alarm" class="screen" role="alert" aria-label="Active Alarm" aria-live="assertive">
+            <div class="alarm-body">
+                <div class="alarm-label" id="alarm-label-text">ALARM · HUMIDITY HIGH</div>
+
+                <div class="alarm-icon-ring">
+                    <div id="alarm-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="alarm-value" id="alarm-value-text">64 %RH</div>
+                    <div class="alarm-threshold" id="alarm-threshold-text" style="margin-top:8px">Threshold 60% ·
+                        hysteresis 5%</div>
+                </div>
+            </div>
+
+            <div class="alarm-actions">
+                <button id="btn-alarm-ack" class="btn-alarm-ack">Acknowledge alarm</button>
+                <button id="btn-alarm-silence" class="btn-alarm-silence">Silence buzzer 5 min</button>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         SCREEN 04 — Alerts & Thresholds (Mockup 04)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <section id="screen-alerts" class="screen" role="main" aria-label="Alerts and Thresholds">
+            <div class="app-header">
+                <div>
+                    <div class="subtitle">CONFIGURATION</div>
+                    <h2>Alarm thresholds</h2>
+                </div>
+            </div>
+
+            <div class="scroll-area">
+                <div id="thresholds-container" style="display:flex;flex-direction:column;gap:14px">
+                    <!-- Dual sliders rendered by alerts.js -->
+                </div>
+
+                <div class="section-heading" style="margin-top:10px">OUTPUTS ON ALARM</div>
+
+                <div id="outputs-container" style="display:flex;flex-direction:column;gap:12px">
+                    <!-- Toggles rendered by alerts.js -->
+                </div>
+
+                <button id="btn-save-thresholds" class="btn-primary" style="margin-top:10px">
+                    Save &amp; sync to station
+                </button>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         SCREEN 05 — History & Logs (Mockup 05)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <section id="screen-history" class="screen" role="main" aria-label="History and Logs">
+            <div class="app-header">
+                <div>
+                    <div class="subtitle">LOGS</div>
+                    <h2>24-hour trend</h2>
+                </div>
+            </div>
+
+            <div class="scroll-area">
+                <!-- Time range tab bar -->
+                <div class="pill-tab-row">
+                    <button class="pill-tab-btn active" data-range="today">Today</button>
+                </div>
+
+                <!-- Trend charts -->
+                <div id="history-charts" style="display:flex;flex-direction:column;gap:14px"></div>
+
+                <button class="btn-primary" id="btn-export-log" style="margin-top:8px">
+                    Export log via Bluetooth
+                </button>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         SCREEN 06 — Device & Patient (Mockup 06)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <section id="screen-settings" class="screen" role="main" aria-label="Device and Patient">
+            <div class="app-header">
+                <div>
+                    <div class="subtitle">PROFILE</div>
+                    <h2>Device &amp; patient</h2>
+                </div>
+            </div>
+
+            <div class="scroll-area">
+                <!-- Patient Profile Card -->
+                <div class="patient-profile-card">
+                    <div class="patient-avatar" id="settings-avatar">AK</div>
+                    <div style="flex:1">
+                        <div class="patient-title" id="settings-patient-name">Ama K. - Bed 4A</div>
+                        <div class="patient-sub" id="settings-patient-room">Room A - monitoring since 08:12</div>
+                    </div>
+                    <button id="btn-edit-patient" class="btn-secondary"
+                        style="padding:6px 14px;font-size:12px;width:auto">Edit</button>
+                </div>
+
+                <div class="section-heading">STATION</div>
+                <div class="settings-table-card">
+                    <div class="settings-row">
+                        <span class="settings-key">Board</span>
+                        <span class="settings-val" id="settings-board-val">ESP32-C6</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-key">Link</span>
+                        <span class="settings-val" id="settings-link-val">HC-05 · paired</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-key">Battery</span>
+                        <span class="settings-val">Li-Ion · 86%</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-key">LCD mirror</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="toggle-lcd-mirror">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-heading">AVERAGING WINDOW</div>
+                <div class="settings-table-card">
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-key">Rolling average</div>
+                            <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">Window length for
+                                readings</div>
+                        </div>
+                        <span class="pill-val-badge" id="settings-avg-window">10 s</span>
+                    </div>
+                </div>
+
+                <div style="text-align:center;margin-top:8px">
+                    <button id="btn-edit-creds" class="btn-secondary"
+                        style="width:auto;padding:8px 16px;font-size:12px">
+                        Change Adafruit IO Credentials
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         SCREEN 07 — Songs (Buzzer Music)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <section id="screen-songs" class="screen" role="region" aria-label="Songs">
+            <div class="app-header">
+                <div>
+                    <div class="subtitle">BUZZER MUSIC PLAYER</div>
+                    <h2>Buzzer Songs</h2>
+                </div>
+            </div>
+
+            <div class="scroll-area">
+                <div id="songs-container">
+                    <!-- Song list dynamically rendered by songs.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+         Bottom Navigation Bar (Mockups 01–06)
+    ═══════════════════════════════════════════════════════════════════ -->
+        <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+            <button class="nav-item active" data-screen="home" id="nav-home">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+                Home
+            </button>
+
+            <button class="nav-item" data-screen="songs" id="nav-songs">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+                Songs
+            </button>
+
+            <button class="nav-item" data-screen="history" id="nav-history">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                </svg>
+                History
+            </button>
+
+            <button class="nav-item" data-screen="alerts" id="nav-alerts">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+                </svg>
+                Alerts
+            </button>
+
+            <button class="nav-item" data-screen="settings" id="nav-settings">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+                Settings
+            </button>
+        </nav>
+
+        <!-- Toast container -->
+        <div id="toast-container" role="status" aria-live="polite"></div>
+
+    </div><!-- /#app -->
+
+    <!-- PWA Service Worker registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () =>
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(r => console.log('[SW] Registered', r.scope))
+                    .catch(e => console.warn('[SW] Registration failed', e))
+            );
+        }
+    </script>
+
+    <!-- Bootstrap app (ES module) -->
+    <script type="module">
+        import { boot } from './js/app.js?v=3';
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+    </script>
+
+</body>
+
+</html>
